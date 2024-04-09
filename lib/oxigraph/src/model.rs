@@ -18,3 +18,5 @@
 //! ```
 
 pub use oxrdf::*;
+
+pub use spargebra::term::GroundQuad;

@@ -10,8 +10,8 @@
 
 use crate::storage::error::{CorruptionError, StorageError};
 use libc::c_void;
-use oxrocksdb_sys::*;
 use rand::random;
+use rocksdb::ffi::*;
 use std::borrow::Borrow;
 #[cfg(unix)]
 use std::cmp::min;

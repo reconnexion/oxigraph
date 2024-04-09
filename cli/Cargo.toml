@@ -20,9 +20,8 @@ path = "src/main.rs"
 doc = false
 
 [features]
-default = ["native-tls"]
+default = []
 native-tls = ["oxigraph/http-client-native-tls"]
-rocksdb-pkg-config = ["oxigraph/rocksdb-pkg-config"]
 rustls-native = ["oxigraph/http-client-rustls-native"]
 rustls-webpki = ["oxigraph/http-client-rustls-webpki"]
 
