@@ -155,11 +155,8 @@ impl Drop for RoDbHandler {
 }
 
 impl Db {
-    pub fn new(
-        column_families: Vec<ColumnFamilyDefinition>,
-        key: Option<[u8; 32]>,
-    ) -> Result<Self, StorageError> {
-        Self::open_read_write(None, column_families, key)
+    pub fn new(column_families: Vec<ColumnFamilyDefinition>) -> Result<Self, StorageError> {
+        Self::open_read_write(None, column_families, None)
     }
 
     pub fn open_read_write(

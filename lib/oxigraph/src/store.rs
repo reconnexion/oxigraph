@@ -91,13 +91,7 @@ impl Store {
     /// Creates a temporary [`Store`] that will be deleted after drop.
     pub fn new() -> Result<Self, StorageError> {
         Ok(Self {
-            storage: Storage::new(None)?,
-        })
-    }
-
-    pub fn new_with_key(key: [u8; 32]) -> Result<Self, StorageError> {
-        Ok(Self {
-            storage: Storage::new(Some(key))?,
+            storage: Storage::new()?,
         })
     }
 

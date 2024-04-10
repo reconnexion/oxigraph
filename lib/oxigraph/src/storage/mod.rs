@@ -72,8 +72,8 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub fn new(key: Option<[u8; 32]>) -> Result<Self, StorageError> {
-        Self::setup(Db::new(Self::column_families(), key)?)
+    pub fn new() -> Result<Self, StorageError> {
+        Self::setup(Db::new(Self::column_families())?)
     }
 
     #[cfg(all(not(target_family = "wasm")))]
