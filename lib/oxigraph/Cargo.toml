@@ -40,7 +40,7 @@ sparopt = { workspace = true, features = ["rdf-star", "sep-0002", "sep-0006"] }
 thiserror.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-libc.workspace = true
+libc = "0.2"
 rocksdb = {git = "https://git.nextgraph.org/NextGraph/rust-rocksdb.git", branch = "master", features = [  ], optional = true }
 
 [target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dependencies]
