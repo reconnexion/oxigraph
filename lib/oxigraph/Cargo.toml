@@ -16,14 +16,8 @@ edition.workspace = true
 rust-version.workspace = true
 
 [features]
-default = ["rocksdb"]
-rocksdb = ["dep:rocksdb"]
 js = ["getrandom/js", "oxsdatatypes/js", "js-sys"]
-http-client = ["oxhttp"]
-http-client-native-tls = ["http-client", "oxhttp/native-tls"]
-http-client-rustls-webpki = ["http-client", "oxhttp/rustls-ring-webpki"]
-http-client-rustls-native = ["http-client", "oxhttp/rustls-ring-native"]
-rocksdb-debug = []
+
 
 [dependencies]
 digest.workspace = true
@@ -47,7 +41,6 @@ thiserror.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 libc.workspace = true
-oxhttp = { workspace = true, optional = true }
 rocksdb = {git = "https://git.nextgraph.org/NextGraph/rust-rocksdb.git", branch = "master", features = [  ], optional = true }
 
 [target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dependencies]
@@ -56,7 +49,6 @@ js-sys = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 codspeed-criterion-compat.workspace = true
-oxhttp.workspace = true
 zstd.workspace = true
 
 [lints]
@@ -65,7 +57,3 @@ workspace = true
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docsrs"]
 
-[[bench]]
-name = "store"
-harness = false
-required-features = ["rocksdb"]
