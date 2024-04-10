@@ -145,18 +145,18 @@ impl Store {
     /// `primary_path` must be the path of the primary instance and `secondary_path` an other directory for the secondary instance cache.
     ///
     /// If you want to simple read-only [`Store`] use [`Store::open_read_only`].
-    #[cfg(all(not(target_family = "wasm")))]
-    pub fn open_persistent_secondary(
-        primary_path: impl AsRef<Path>,
-        secondary_path: impl AsRef<Path>,
-    ) -> Result<Self, StorageError> {
-        Ok(Self {
-            storage: Storage::open_persistent_secondary(
-                primary_path.as_ref(),
-                secondary_path.as_ref(),
-            )?,
-        })
-    }
+    // #[cfg(all(not(target_family = "wasm")))]
+    // pub fn open_persistent_secondary(
+    //     primary_path: impl AsRef<Path>,
+    //     secondary_path: impl AsRef<Path>,
+    // ) -> Result<Self, StorageError> {
+    //     Ok(Self {
+    //         storage: Storage::open_persistent_secondary(
+    //             primary_path.as_ref(),
+    //             secondary_path.as_ref(),
+    //         )?,
+    //     })
+    // }
 
     /// Opens a read-only [`Store`] from disk.
     ///
