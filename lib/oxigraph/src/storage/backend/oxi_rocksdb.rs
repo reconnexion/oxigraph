@@ -9,7 +9,7 @@
 )]
 
 use crate::storage::error::{CorruptionError, StorageError};
-use libc::c_void;
+use libc::{c_char, c_void};
 use rand::random;
 use rocksdb::ffi::*;
 use std::borrow::Borrow;
