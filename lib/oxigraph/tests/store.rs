@@ -5,22 +5,22 @@ use oxigraph::io::RdfFormat;
 use oxigraph::model::vocab::{rdf, xsd};
 use oxigraph::model::*;
 use oxigraph::store::Store;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use rand::random;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::env::temp_dir;
 use std::error::Error;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::fs::{create_dir_all, remove_dir_all, File};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::io::Write;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::iter::empty;
-#[cfg(all(target_os = "linux", feature = "rocksdb"))]
+#[cfg(all(target_os = "linux"))]
 use std::iter::once;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::path::{Path, PathBuf};
-#[cfg(all(target_os = "linux", feature = "rocksdb"))]
+#[cfg(all(target_os = "linux"))]
 use std::process::Command;
 
 #[allow(clippy::non_ascii_literal)]
@@ -121,7 +121,7 @@ fn test_load_graph() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bulk_load_graph() -> Result<(), Box<dyn Error>> {
     let store = Store::new()?;
     store
@@ -135,7 +135,7 @@ fn test_bulk_load_graph() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bulk_load_graph_lenient() -> Result<(), Box<dyn Error>> {
     let store = Store::new()?;
     store.bulk_loader().on_parse_error(|_| Ok(())).load_from_read(
@@ -154,7 +154,7 @@ fn test_bulk_load_graph_lenient() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bulk_load_empty() -> Result<(), Box<dyn Error>> {
     let store = Store::new()?;
     store.bulk_loader().load_quads(empty::<Quad>())?;
@@ -177,7 +177,7 @@ fn test_load_dataset() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bulk_load_dataset() -> Result<(), Box<dyn Error>> {
     let store = Store::new()?;
     store
@@ -258,7 +258,7 @@ fn test_snapshot_isolation_iterator() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bulk_load_on_existing_delete_overrides_the_delete() -> Result<(), Box<dyn Error>> {
     let quad = QuadRef::new(
         NamedNodeRef::new_unchecked("http://example.com/s"),
@@ -274,7 +274,7 @@ fn test_bulk_load_on_existing_delete_overrides_the_delete() -> Result<(), Box<dy
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_open_bad_dir() -> Result<(), Box<dyn Error>> {
     let dir = TempDir::default();
     create_dir_all(&dir.0)?;
@@ -286,7 +286,7 @@ fn test_open_bad_dir() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(target_os = "linux", feature = "rocksdb"))]
+#[cfg(all(target_os = "linux"))]
 fn test_bad_stt_open() -> Result<(), Box<dyn Error>> {
     let dir = TempDir::default();
     let store = Store::open(&dir.0)?;
@@ -303,48 +303,48 @@ fn test_bad_stt_open() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// #[test]
+// #[cfg(all(not(target_family = "wasm")))]
+// fn test_backup() -> Result<(), Box<dyn Error>> {
+//     let quad = QuadRef::new(
+//         NamedNodeRef::new_unchecked("http://example.com/s"),
+//         NamedNodeRef::new_unchecked("http://example.com/p"),
+//         NamedNodeRef::new_unchecked("http://example.com/o"),
+//         GraphNameRef::DefaultGraph,
+//     );
+//     let store_dir = TempDir::default();
+//     let backup_from_rw_dir = TempDir::default();
+//     let backup_from_ro_dir = TempDir::default();
+//     let backup_from_secondary_dir = TempDir::default();
+
+//     let store = Store::open(&store_dir)?;
+//     store.insert(quad)?;
+//     let secondary_store = Store::open_secondary(&store_dir)?;
+//     store.flush()?;
+
+//     store.backup(&backup_from_rw_dir)?;
+//     secondary_store.backup(&backup_from_secondary_dir)?;
+//     store.remove(quad)?;
+//     assert!(!store.contains(quad)?);
+
+//     let backup_from_rw = Store::open_read_only(&backup_from_rw_dir.0)?;
+//     backup_from_rw.validate()?;
+//     assert!(backup_from_rw.contains(quad)?);
+//     backup_from_rw.backup(&backup_from_ro_dir)?;
+
+//     let backup_from_ro = Store::open_read_only(&backup_from_ro_dir.0)?;
+//     backup_from_ro.validate()?;
+//     assert!(backup_from_ro.contains(quad)?);
+
+//     let backup_from_secondary = Store::open_read_only(&backup_from_secondary_dir.0)?;
+//     backup_from_secondary.validate()?;
+//     assert!(backup_from_secondary.contains(quad)?);
+
+//     Ok(())
+// }
+
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-fn test_backup() -> Result<(), Box<dyn Error>> {
-    let quad = QuadRef::new(
-        NamedNodeRef::new_unchecked("http://example.com/s"),
-        NamedNodeRef::new_unchecked("http://example.com/p"),
-        NamedNodeRef::new_unchecked("http://example.com/o"),
-        GraphNameRef::DefaultGraph,
-    );
-    let store_dir = TempDir::default();
-    let backup_from_rw_dir = TempDir::default();
-    let backup_from_ro_dir = TempDir::default();
-    let backup_from_secondary_dir = TempDir::default();
-
-    let store = Store::open(&store_dir)?;
-    store.insert(quad)?;
-    let secondary_store = Store::open_secondary(&store_dir)?;
-    store.flush()?;
-
-    store.backup(&backup_from_rw_dir)?;
-    secondary_store.backup(&backup_from_secondary_dir)?;
-    store.remove(quad)?;
-    assert!(!store.contains(quad)?);
-
-    let backup_from_rw = Store::open_read_only(&backup_from_rw_dir.0)?;
-    backup_from_rw.validate()?;
-    assert!(backup_from_rw.contains(quad)?);
-    backup_from_rw.backup(&backup_from_ro_dir)?;
-
-    let backup_from_ro = Store::open_read_only(&backup_from_ro_dir.0)?;
-    backup_from_ro.validate()?;
-    assert!(backup_from_ro.contains(quad)?);
-
-    let backup_from_secondary = Store::open_read_only(&backup_from_secondary_dir.0)?;
-    backup_from_secondary.validate()?;
-    assert!(backup_from_secondary.contains(quad)?);
-
-    Ok(())
-}
-
-#[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_bad_backup() -> Result<(), Box<dyn Error>> {
     let store_dir = TempDir::default();
     let backup_dir = TempDir::default();
@@ -355,7 +355,7 @@ fn test_bad_backup() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_backup_on_in_memory() -> Result<(), Box<dyn Error>> {
     let backup_dir = TempDir::default();
     Store::new()?.backup(&backup_dir).unwrap_err();
@@ -363,7 +363,7 @@ fn test_backup_on_in_memory() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(target_os = "linux", feature = "rocksdb"))]
+#[cfg(all(target_os = "linux"))]
 fn test_backward_compatibility() -> Result<(), Box<dyn Error>> {
     // We run twice to check if data is properly saved and closed
     for _ in 0..2 {
@@ -386,63 +386,63 @@ fn test_backward_compatibility() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// #[test]
+// #[cfg(all(not(target_family = "wasm")))]
+// fn test_secondary() -> Result<(), Box<dyn Error>> {
+//     let quad = QuadRef::new(
+//         NamedNodeRef::new_unchecked("http://example.com/s"),
+//         NamedNodeRef::new_unchecked("http://example.com/p"),
+//         NamedNodeRef::new_unchecked("http://example.com/o"),
+//         GraphNameRef::DefaultGraph,
+//     );
+//     let primary_dir = TempDir::default();
+
+//     // We open the store
+//     let primary = Store::open(&primary_dir)?;
+//     let secondary = Store::open_secondary(&primary_dir)?;
+
+//     // We insert a quad
+//     primary.insert(quad)?;
+//     primary.flush()?;
+
+//     // It is readable from both stores
+//     for store in &[&primary, &secondary] {
+//         assert!(store.contains(quad)?);
+//         assert_eq!(
+//             store.iter().collect::<Result<Vec<_>, _>>()?,
+//             vec![quad.into_owned()]
+//         );
+//     }
+
+//     // We validate the states
+//     primary.validate()?;
+//     secondary.validate()?;
+
+//     // We close the primary store and remove its content
+//     drop(primary);
+//     remove_dir_all(&primary_dir)?;
+
+//     // We secondary store is still readable
+//     assert!(secondary.contains(quad)?);
+//     secondary.validate()?;
+
+//     Ok(())
+// }
+
+// #[test]
+// #[cfg(all(not(target_family = "wasm")))]
+// fn test_open_secondary_bad_dir() -> Result<(), Box<dyn Error>> {
+//     let primary_dir = TempDir::default();
+//     create_dir_all(&primary_dir.0)?;
+//     {
+//         File::create(primary_dir.0.join("CURRENT"))?.write_all(b"foo")?;
+//     }
+//     assert!(Store::open_secondary(&primary_dir).is_err());
+//     Ok(())
+// }
+
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-fn test_secondary() -> Result<(), Box<dyn Error>> {
-    let quad = QuadRef::new(
-        NamedNodeRef::new_unchecked("http://example.com/s"),
-        NamedNodeRef::new_unchecked("http://example.com/p"),
-        NamedNodeRef::new_unchecked("http://example.com/o"),
-        GraphNameRef::DefaultGraph,
-    );
-    let primary_dir = TempDir::default();
-
-    // We open the store
-    let primary = Store::open(&primary_dir)?;
-    let secondary = Store::open_secondary(&primary_dir)?;
-
-    // We insert a quad
-    primary.insert(quad)?;
-    primary.flush()?;
-
-    // It is readable from both stores
-    for store in &[&primary, &secondary] {
-        assert!(store.contains(quad)?);
-        assert_eq!(
-            store.iter().collect::<Result<Vec<_>, _>>()?,
-            vec![quad.into_owned()]
-        );
-    }
-
-    // We validate the states
-    primary.validate()?;
-    secondary.validate()?;
-
-    // We close the primary store and remove its content
-    drop(primary);
-    remove_dir_all(&primary_dir)?;
-
-    // We secondary store is still readable
-    assert!(secondary.contains(quad)?);
-    secondary.validate()?;
-
-    Ok(())
-}
-
-#[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-fn test_open_secondary_bad_dir() -> Result<(), Box<dyn Error>> {
-    let primary_dir = TempDir::default();
-    create_dir_all(&primary_dir.0)?;
-    {
-        File::create(primary_dir.0.join("CURRENT"))?.write_all(b"foo")?;
-    }
-    assert!(Store::open_secondary(&primary_dir).is_err());
-    Ok(())
-}
-
-#[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_read_only() -> Result<(), Box<dyn Error>> {
     let s = NamedNodeRef::new_unchecked("http://example.com/s");
     let p = NamedNodeRef::new_unchecked("http://example.com/p");
@@ -468,7 +468,7 @@ fn test_read_only() -> Result<(), Box<dyn Error>> {
     }
 
     // We open as read-only
-    let read_only = Store::open_read_only(&store_dir)?;
+    let read_only = Store::open_read_only(&store_dir, None)?;
     assert!(read_only.contains(first_quad)?);
     assert_eq!(
         read_only.iter().collect::<Result<Vec<_>, _>>()?,
@@ -491,18 +491,18 @@ fn test_read_only() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn test_open_read_only_bad_dir() -> Result<(), Box<dyn Error>> {
     let dir = TempDir::default();
     create_dir_all(&dir.0)?;
     {
         File::create(dir.0.join("CURRENT"))?.write_all(b"foo")?;
     }
-    assert!(Store::open_read_only(&dir).is_err());
+    assert!(Store::open_read_only(&dir, None).is_err());
     Ok(())
 }
 
-#[cfg(all(target_os = "linux", feature = "rocksdb"))]
+#[cfg(all(target_os = "linux"))]
 fn reset_dir(dir: &str) -> Result<(), Box<dyn Error>> {
     assert!(Command::new("git")
         .args(["clean", "-fX", dir])
@@ -515,24 +515,24 @@ fn reset_dir(dir: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 struct TempDir(PathBuf);
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl Default for TempDir {
     fn default() -> Self {
         Self(temp_dir().join(format!("oxigraph-test-{}", random::<u128>())))
     }
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl AsRef<Path> for TempDir {
     fn as_ref(&self) -> &Path {
         &self.0
     }
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl Drop for TempDir {
     fn drop(&mut self) {
         if self.0.is_dir() {

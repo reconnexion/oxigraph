@@ -25,7 +25,7 @@
 //! };
 //! # Result::<_, Box<dyn std::error::Error>>::Ok(())
 //! ```
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use crate::io::RdfParseError;
 use crate::io::{RdfFormat, RdfParser, RdfSerializer};
 use crate::model::*;
@@ -34,7 +34,7 @@ use crate::sparql::{
     QueryResults, Update, UpdateOptions,
 };
 use crate::storage::numeric_encoder::{Decoder, EncodedQuad, EncodedTerm};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use crate::storage::StorageBulkLoader;
 use crate::storage::{
     ChainedDecodingQuadIterator, DecodingGraphIterator, Storage, StorageReader, StorageWriter,
@@ -42,7 +42,7 @@ use crate::storage::{
 pub use crate::storage::{CorruptionError, LoaderError, SerializerError, StorageError};
 use std::error::Error;
 use std::io::{Read, Write};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::path::Path;
 use std::{fmt, str};
 
@@ -91,7 +91,13 @@ impl Store {
     /// Creates a temporary [`Store`] that will be deleted after drop.
     pub fn new() -> Result<Self, StorageError> {
         Ok(Self {
-            storage: Storage::new()?,
+            storage: Storage::new(None)?,
+        })
+    }
+
+    pub fn new_with_key(key: [u8; 32]) -> Result<Self, StorageError> {
+        Ok(Self {
+            storage: Storage::new(Some(key))?,
         })
     }
 
@@ -100,29 +106,36 @@ impl Store {
     /// Only one read-write [`Store`] can exist at the same time.
     /// If you want to have extra [`Store`] instance opened on a same data
     /// use [`Store::open_secondary`] or [`Store::open_read_only`].
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn open(path: impl AsRef<Path>) -> Result<Self, StorageError> {
         Ok(Self {
-            storage: Storage::open(path.as_ref())?,
+            storage: Storage::open(path.as_ref(), None)?,
         })
     }
 
-    /// Opens a read-only clone of a running read-write [`Store`].
-    ///
-    /// Changes done while this process is running will be replicated after a possible lag.
-    ///
-    /// It should only be used if a primary instance opened with [`Store::open`] is running at the same time.
-    /// `primary_path` must be the path of the primary instance.
-    /// This secondary instance will use temporary storage for the secondary instance cache.
-    /// If you prefer persistent storage use [`Store::open_persistent_secondary`].
-    ///
-    /// If you want to simple read-only [`Store`] use [`Store::open_read_only`].
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open_secondary(primary_path: impl AsRef<Path>) -> Result<Self, StorageError> {
+    #[cfg(all(not(target_family = "wasm")))]
+    pub fn open_with_key(path: impl AsRef<Path>, key: [u8; 32]) -> Result<Self, StorageError> {
         Ok(Self {
-            storage: Storage::open_secondary(primary_path.as_ref())?,
+            storage: Storage::open(path.as_ref(), Some(key))?,
         })
     }
+
+    // /// Opens a read-only clone of a running read-write [`Store`].
+    // ///
+    // /// Changes done while this process is running will be replicated after a possible lag.
+    // ///
+    // /// It should only be used if a primary instance opened with [`Store::open`] is running at the same time.
+    // /// `primary_path` must be the path of the primary instance.
+    // /// This secondary instance will use temporary storage for the secondary instance cache.
+    // /// If you prefer persistent storage use [`Store::open_persistent_secondary`].
+    // ///
+    // /// If you want to simple read-only [`Store`] use [`Store::open_read_only`].
+    // #[cfg(all(not(target_family = "wasm")))]
+    // pub fn open_secondary(primary_path: impl AsRef<Path>) -> Result<Self, StorageError> {
+    //     Ok(Self {
+    //         storage: Storage::open_secondary(primary_path.as_ref())?,
+    //     })
+    // }
 
     /// Opens a read-only clone of a running read-write [`Store`] with persistence of the secondary instance cache.
     ///
@@ -132,7 +145,7 @@ impl Store {
     /// `primary_path` must be the path of the primary instance and `secondary_path` an other directory for the secondary instance cache.
     ///
     /// If you want to simple read-only [`Store`] use [`Store::open_read_only`].
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn open_persistent_secondary(
         primary_path: impl AsRef<Path>,
         secondary_path: impl AsRef<Path>,
@@ -149,10 +162,13 @@ impl Store {
     ///
     /// Opening as read-only while having an other process writing the database is undefined behavior.
     /// [`Store::open_secondary`] should be used in this case.
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open_read_only(path: impl AsRef<Path>) -> Result<Self, StorageError> {
+    #[cfg(all(not(target_family = "wasm")))]
+    pub fn open_read_only(
+        path: impl AsRef<Path>,
+        key: Option<[u8; 32]>,
+    ) -> Result<Self, StorageError> {
         Ok(Self {
-            storage: Storage::open_read_only(path.as_ref())?,
+            storage: Storage::open_read_only(path.as_ref(), key)?,
         })
     }
 
@@ -930,7 +946,7 @@ impl Store {
     /// Flushes all buffers and ensures that all writes are saved on disk.
     ///
     /// Flushes are automatically done using background threads but might lag a little bit.
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn flush(&self) -> Result<(), StorageError> {
         self.storage.flush()
     }
@@ -940,7 +956,7 @@ impl Store {
     /// Useful to call after a batch upload or another similar operation.
     ///
     /// <div class="warning">Can take hours on huge databases.</div>
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn optimize(&self) -> Result<(), StorageError> {
         self.storage.compact()
     }
@@ -963,7 +979,7 @@ impl Store {
     /// This allows cheap regular backups.
     ///
     /// If you want to move your data to another RDF storage system, you should have a look at the [`Store::dump_to_write`] function instead.
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn backup(&self, target_directory: impl AsRef<Path>) -> Result<(), StorageError> {
         self.storage.backup(target_directory.as_ref())
     }
@@ -990,7 +1006,7 @@ impl Store {
     /// assert!(store.contains(QuadRef::new(ex, ex, ex, ex))?);
     /// # Result::<_, Box<dyn std::error::Error>>::Ok(())
     /// ```
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn bulk_loader(&self) -> BulkLoader {
         BulkLoader {
             storage: StorageBulkLoader::new(self.storage.clone()),
@@ -1608,14 +1624,14 @@ impl Iterator for GraphNameIter {
 /// assert!(store.contains(QuadRef::new(ex, ex, ex, ex))?);
 /// # Result::<_, Box<dyn std::error::Error>>::Ok(())
 /// ```
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 #[must_use]
 pub struct BulkLoader {
     storage: StorageBulkLoader,
     on_parse_error: Option<Box<dyn Fn(RdfParseError) -> Result<(), RdfParseError>>>,
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl BulkLoader {
     /// Sets the maximal number of threads to be used by the bulk loader per operation.
     ///

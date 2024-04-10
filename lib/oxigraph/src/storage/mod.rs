@@ -1,9 +1,9 @@
 #![allow(clippy::same_name_method)]
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use crate::model::Quad;
 use crate::model::{GraphNameRef, NamedOrBlankNodeRef, QuadRef, TermRef};
 use crate::storage::backend::{Reader, Transaction};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use crate::storage::binary_encoder::LATEST_STORAGE_VERSION;
 use crate::storage::binary_encoder::{
     decode_term, encode_term, encode_term_pair, encode_term_quad, encode_term_triple,
@@ -12,22 +12,22 @@ use crate::storage::binary_encoder::{
     WRITTEN_TERM_MAX_SIZE,
 };
 pub use crate::storage::error::{CorruptionError, LoaderError, SerializerError, StorageError};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use crate::storage::numeric_encoder::Decoder;
 use crate::storage::numeric_encoder::{insert_term, EncodedQuad, EncodedTerm, StrHash, StrLookup};
 use backend::{ColumnFamily, ColumnFamilyDefinition, Db, Iter};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::collections::VecDeque;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::mem::{swap, take};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::path::{Path, PathBuf};
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::sync::Mutex;
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 use std::{io, thread};
 
 mod backend;
@@ -47,16 +47,16 @@ const DSPO_CF: &str = "dspo";
 const DPOS_CF: &str = "dpos";
 const DOSP_CF: &str = "dosp";
 const GRAPHS_CF: &str = "graphs";
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 const DEFAULT_CF: &str = "default";
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 const DEFAULT_BULK_LOAD_BATCH_SIZE: usize = 1_000_000;
 
 /// Low level storage primitives
 #[derive(Clone)]
 pub struct Storage {
     db: Db,
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     default_cf: ColumnFamily,
     id2str_cf: ColumnFamily,
     spog_cf: ColumnFamily,
@@ -72,39 +72,43 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub fn new() -> Result<Self, StorageError> {
-        Self::setup(Db::new(Self::column_families())?)
+    pub fn new(key: Option<[u8; 32]>) -> Result<Self, StorageError> {
+        Self::setup(Db::new(Self::column_families(), key)?)
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open(path: &Path) -> Result<Self, StorageError> {
-        Self::setup(Db::open_read_write(Some(path), Self::column_families())?)
-    }
-
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open_secondary(primary_path: &Path) -> Result<Self, StorageError> {
-        Self::setup(Db::open_secondary(
-            primary_path,
-            None,
+    #[cfg(all(not(target_family = "wasm")))]
+    pub fn open(path: &Path, key: Option<[u8; 32]>) -> Result<Self, StorageError> {
+        Self::setup(Db::open_read_write(
+            Some(path),
             Self::column_families(),
+            key,
         )?)
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open_persistent_secondary(
-        primary_path: &Path,
-        secondary_path: &Path,
-    ) -> Result<Self, StorageError> {
-        Self::setup(Db::open_secondary(
-            primary_path,
-            Some(secondary_path),
-            Self::column_families(),
-        )?)
-    }
+    // #[cfg(all(not(target_family = "wasm")))]
+    // pub fn open_secondary(primary_path: &Path) -> Result<Self, StorageError> {
+    //     Self::setup(Db::open_secondary(
+    //         primary_path,
+    //         None,
+    //         Self::column_families(),
+    //     )?)
+    // }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
-    pub fn open_read_only(path: &Path) -> Result<Self, StorageError> {
-        Self::setup(Db::open_read_only(path, Self::column_families())?)
+    // #[cfg(all(not(target_family = "wasm")))]
+    // pub fn open_persistent_secondary(
+    //     primary_path: &Path,
+    //     secondary_path: &Path,
+    // ) -> Result<Self, StorageError> {
+    //     Self::setup(Db::open_secondary(
+    //         primary_path,
+    //         Some(secondary_path),
+    //         Self::column_families(),
+    //     )?)
+    // }
+
+    #[cfg(all(not(target_family = "wasm")))]
+    pub fn open_read_only(path: &Path, key: Option<[u8; 32]>) -> Result<Self, StorageError> {
+        Self::setup(Db::open_read_only(path, Self::column_families(), key)?)
     }
 
     fn column_families() -> Vec<ColumnFamilyDefinition> {
@@ -180,7 +184,7 @@ impl Storage {
 
     fn setup(db: Db) -> Result<Self, StorageError> {
         let this = Self {
-            #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+            #[cfg(all(not(target_family = "wasm")))]
             default_cf: db.column_family(DEFAULT_CF)?,
             id2str_cf: db.column_family(ID2STR_CF)?,
             spog_cf: db.column_family(SPOG_CF)?,
@@ -195,12 +199,12 @@ impl Storage {
             graphs_cf: db.column_family(GRAPHS_CF)?,
             db,
         };
-        #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+        #[cfg(all(not(target_family = "wasm")))]
         this.migrate()?;
         Ok(this)
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     fn migrate(&self) -> Result<(), StorageError> {
         let mut version = self.ensure_version()?;
         if version == 0 {
@@ -240,7 +244,7 @@ impl Storage {
         }
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     fn ensure_version(&self) -> Result<u64, StorageError> {
         Ok(
             if let Some(version) = self.db.get(&self.default_cf, b"oxversion")? {
@@ -254,7 +258,7 @@ impl Storage {
         )
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     fn update_version(&self, version: u64) -> Result<(), StorageError> {
         self.db
             .insert(&self.default_cf, b"oxversion", &version.to_be_bytes())?;
@@ -281,12 +285,12 @@ impl Storage {
         })
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn flush(&self) -> Result<(), StorageError> {
         self.db.flush()
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn compact(&self) -> Result<(), StorageError> {
         self.db.compact(&self.default_cf)?;
         self.db.compact(&self.gspo_cf)?;
@@ -301,7 +305,7 @@ impl Storage {
         self.db.compact(&self.id2str_cf)
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn backup(&self, target_directory: &Path) -> Result<(), StorageError> {
         self.db.backup(target_directory)
     }
@@ -626,7 +630,7 @@ impl StorageReader {
         }
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn get_str(&self, key: &StrHash) -> Result<Option<String>, StorageError> {
         Ok(self
             .storage
@@ -647,7 +651,7 @@ impl StorageReader {
             .map_err(CorruptionError::new)?)
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn contains_str(&self, key: &StrHash) -> Result<bool, StorageError> {
         self.storage
             .db
@@ -661,7 +665,7 @@ impl StorageReader {
     }
 
     /// Validates that all the storage invariants held in the data
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     pub fn validate(&self) -> Result<(), StorageError> {
         // triples
         let dspo_size = self.dspo_quads(&[]).count();
@@ -997,7 +1001,7 @@ impl<'a> StorageWriter<'a> {
         }
     }
 
-    #[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+    #[cfg(all(not(target_family = "wasm")))]
     fn insert_str(&mut self, key: &StrHash, value: &str) -> Result<(), StorageError> {
         if self
             .storage
@@ -1178,7 +1182,7 @@ impl<'a> StorageWriter<'a> {
     }
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 #[must_use]
 pub struct StorageBulkLoader {
     storage: Storage,
@@ -1187,7 +1191,7 @@ pub struct StorageBulkLoader {
     max_memory_size: Option<usize>,
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl StorageBulkLoader {
     pub fn new(storage: Storage) -> Self {
         Self {
@@ -1318,7 +1322,7 @@ impl StorageBulkLoader {
     }
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 struct FileBulkLoader<'a> {
     storage: &'a Storage,
     id2str: HashMap<StrHash, Box<str>>,
@@ -1327,7 +1331,7 @@ struct FileBulkLoader<'a> {
     graphs: HashSet<EncodedTerm>,
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 impl<'a> FileBulkLoader<'a> {
     fn new(storage: &'a Storage, batch_size: usize) -> Self {
         Self {
@@ -1533,7 +1537,7 @@ impl<'a> FileBulkLoader<'a> {
     }
 }
 
-#[cfg(all(not(target_family = "wasm"), feature = "rocksdb"))]
+#[cfg(all(not(target_family = "wasm")))]
 fn map_thread_result<R>(result: thread::Result<R>) -> io::Result<R> {
     result.map_err(|e| {
         io::Error::new(
