@@ -28,6 +28,13 @@ use std::sync::{Arc, OnceLock};
 use std::thread::{available_parallelism, yield_now};
 use std::{fmt, io, ptr, slice};
 
+pub fn opt_bytes_to_ptr<T: AsRef<[u8]>>(opt: Option<T>) -> *const c_char {
+    match opt {
+        Some(v) => v.as_ref().as_ptr() as *const c_char,
+        None => ptr::null(),
+    }
+}
+
 macro_rules! ffi_result {
     ( $($function:ident)::*( $arg1:expr $(, $arg:expr)* $(,)? ) ) => {{
         let mut status = rocksdb_status_t {
@@ -440,6 +447,7 @@ impl Db {
     fn db_options(
         limit_max_open_files: bool,
         in_memory: bool,
+        key: Option<[u8; 32]>,
     ) -> Result<*mut rocksdb_options_t, StorageError> {
         static ROCKSDB_ENV: OnceLock<UnsafeEnv> = OnceLock::new();
         static ROCKSDB_MEM_ENV: OnceLock<UnsafeEnv> = OnceLock::new();
@@ -487,8 +495,8 @@ impl Db {
                     })
                 } else {
                     ROCKSDB_ENV.get_or_init(|| {
-                        let env = rocksdb_create_default_env();
-                        assert!(!env.is_null(), "rocksdb_create_default_env returned null");
+                        let env = rocksdb_create_encrypted_env(opt_bytes_to_ptr(key.as_ref()));
+                        assert!(!env.is_null(), "rocksdb_create_encrypted_env returned null");
                         UnsafeEnv(env)
                     })
                 }
