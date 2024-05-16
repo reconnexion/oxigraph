@@ -255,6 +255,7 @@ impl Db {
                 !write_options.is_null(),
                 "rocksdb_writeoptions_create returned null"
             );
+            rocksdb_writeoptions_set_sync(write_options, 1);
             if in_memory {
                 rocksdb_writeoptions_disable_WAL(write_options, 1); // No need for WAL
             }
