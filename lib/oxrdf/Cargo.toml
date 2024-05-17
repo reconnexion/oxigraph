@@ -23,6 +23,7 @@ oxiri.workspace = true
 oxsdatatypes = { workspace = true, optional = true }
 rand.workspace = true
 thiserror.workspace = true
+serde.workspace = true
 
 [lints]
 workspace = true

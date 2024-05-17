@@ -24,6 +24,7 @@ rust-version = "1.70"
 
 [workspace.dependencies]
 rocksdb = {git = "https://git.nextgraph.org/NextGraph/rust-rocksdb.git", branch = "master", features = [  ] }
+serde = { version = "1.0.142", features = ["derive"] }
 anyhow = "1.0.72"
 arbitrary = "1.3"
 assert_cmd = "2.0"

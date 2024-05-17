@@ -1,4 +1,5 @@
 use crate::{DateTime, Decimal};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
 use std::str::FromStr;
@@ -7,7 +8,7 @@ use std::time::Duration as StdDuration;
 /// [XML Schema `duration` datatype](https://www.w3.org/TR/xmlschema11-2/#duration)
 ///
 /// It stores the duration using a pair of a [`YearMonthDuration`] and a [`DayTimeDuration`].
-#[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Default)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Default, Serialize, Deserialize)]
 pub struct Duration {
     year_month: YearMonthDuration,
     day_time: DayTimeDuration,
@@ -293,7 +294,9 @@ impl PartialOrd for Duration {
 /// [XML Schema `yearMonthDuration` datatype](https://www.w3.org/TR/xmlschema11-2/#yearMonthDuration)
 ///
 /// It stores the duration as a number of months encoded using a [`i64`].
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default)]
+#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default, Serialize, Deserialize,
+)]
 pub struct YearMonthDuration {
     months: i64,
 }
@@ -460,7 +463,9 @@ impl PartialOrd<YearMonthDuration> for Duration {
 /// [XML Schema `dayTimeDuration` datatype](https://www.w3.org/TR/xmlschema11-2/#dayTimeDuration)
 ///
 /// It stores the duration as a number of seconds encoded using a [`Decimal`].
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default)]
+#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default, Serialize, Deserialize,
+)]
 pub struct DayTimeDuration {
     seconds: Decimal,
 }

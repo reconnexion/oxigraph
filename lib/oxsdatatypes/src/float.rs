@@ -1,4 +1,5 @@
 use crate::{Boolean, Double, Integer};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
 use std::num::ParseFloatError;
@@ -10,7 +11,7 @@ use std::str::FromStr;
 /// Uses internally a [`f32`].
 ///
 /// <div class="warning">Serialization does not follow the canonical mapping.</div>
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Float {
     value: f32,

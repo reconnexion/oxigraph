@@ -1,11 +1,14 @@
 use crate::{Decimal, Double, Float, Integer};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::{FromStr, ParseBoolError};
 
 /// [XML Schema `boolean` datatype](https://www.w3.org/TR/xmlschema11-2/#boolean)
 ///
 /// Uses internally a [`bool`].
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 #[repr(transparent)]
 pub struct Boolean {
     value: bool,

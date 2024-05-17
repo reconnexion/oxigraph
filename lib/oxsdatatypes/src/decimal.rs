@@ -1,4 +1,5 @@
 use crate::{Boolean, Double, Float, Integer, TooLargeForIntegerError};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::Write;
 use std::str::FromStr;
@@ -12,7 +13,9 @@ const DECIMAL_PART_POW_MINUS_ONE: i128 = 100_000_000_000_000_000;
 /// It stores the decimal in a fix point encoding allowing nearly 18 digits before and 18 digits after ".".
 ///
 /// It stores the value in a [`i128`] integer after multiplying it by 10¹⁸.
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default)]
+#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Default, Serialize, Deserialize,
+)]
 pub struct Decimal {
     value: i128, // value * 10^18
 }

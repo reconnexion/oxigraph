@@ -3,6 +3,7 @@ use crate::vocab::{rdf, xsd};
 use oxilangtag::{LanguageTag, LanguageTagParseError};
 #[cfg(feature = "oxsdatatypes")]
 use oxsdatatypes::*;
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt;
 use std::fmt::Write;
@@ -31,10 +32,10 @@ use std::fmt::Write;
 /// );
 /// # Result::<(), LanguageTagParseError>::Ok(())
 /// ```
-#[derive(Eq, PartialEq, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct Literal(LiteralContent);
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 enum LiteralContent {
     String(String),
     LanguageTaggedString { value: String, language: String },

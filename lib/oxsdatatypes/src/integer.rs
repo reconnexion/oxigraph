@@ -1,4 +1,5 @@
 use crate::{Boolean, Decimal, Double, Float};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::num::ParseIntError;
 use std::str::FromStr;
@@ -6,7 +7,9 @@ use std::str::FromStr;
 /// [XML Schema `integer` datatype](https://www.w3.org/TR/xmlschema11-2/#integer)
 ///
 /// Uses internally a [`i64`].
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(
+    Debug, Clone, Copy, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize,
+)]
 #[repr(transparent)]
 pub struct Integer {
     value: i64,

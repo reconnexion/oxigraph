@@ -1,4 +1,5 @@
 use oxiri::{Iri, IriParseError};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
 
@@ -14,7 +15,7 @@ use std::fmt;
 /// );
 /// # Result::<_,oxrdf::IriParseError>::Ok(())
 /// ```
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct NamedNode {
     iri: String,
 }

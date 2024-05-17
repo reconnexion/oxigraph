@@ -1,6 +1,7 @@
 #![allow(clippy::expect_used)]
 
 use crate::{DayTimeDuration, Decimal, Duration, YearMonthDuration};
+use serde::{Deserialize, Serialize};
 use std::cmp::{min, Ordering};
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -10,7 +11,7 @@ use std::str::FromStr;
 ///
 /// It encodes the value using a number of seconds from the Gregorian calendar era using a [`Decimal`]
 /// and an optional timezone offset in minutes.
-#[derive(Eq, PartialEq, PartialOrd, Debug, Clone, Copy, Hash)]
+#[derive(Eq, PartialEq, PartialOrd, Debug, Clone, Copy, Hash, Serialize, Deserialize)]
 pub struct DateTime {
     timestamp: Timestamp,
 }
@@ -1452,7 +1453,7 @@ impl fmt::Display for GDay {
 /// A timezone offset with respect to UTC.
 ///
 /// It is encoded as a number of minutes between -PT14H and PT14H.
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Copy, Hash, Serialize, Deserialize)]
 pub struct TimezoneOffset {
     offset: i16, // in minute with respect to UTC
 }
@@ -1562,7 +1563,7 @@ struct DateTimeSevenPropertyModel {
     timezone_offset: Option<TimezoneOffset>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct Timestamp {
     value: Decimal,
     timezone_offset: Option<TimezoneOffset>,
@@ -3140,7 +3141,7 @@ mod tests {
     fn custom_now() {
         #[allow(unsafe_code)]
         #[no_mangle]
-        extern "Rust" fn custom_ox_now() -> Duration {
+        fn custom_ox_now() -> Duration {
             Duration::default()
         }
         DateTime::now();

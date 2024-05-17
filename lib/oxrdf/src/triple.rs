@@ -2,10 +2,11 @@ use crate::blank_node::BlankNode;
 use crate::literal::Literal;
 use crate::named_node::NamedNode;
 use crate::{BlankNodeRef, LiteralRef, NamedNodeRef};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// The owned union of [IRIs](https://www.w3.org/TR/rdf11-concepts/#dfn-iri) and [blank nodes](https://www.w3.org/TR/rdf11-concepts/#dfn-blank-node).
-#[derive(Eq, PartialEq, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum NamedOrBlankNode {
     NamedNode(NamedNode),
     BlankNode(BlankNode),
@@ -152,7 +153,7 @@ impl<'a> From<NamedOrBlankNodeRef<'a>> for NamedOrBlankNode {
 }
 
 /// The owned union of [IRIs](https://www.w3.org/TR/rdf11-concepts/#dfn-iri), [blank nodes](https://www.w3.org/TR/rdf11-concepts/#dfn-blank-node)  and [triples](https://www.w3.org/TR/rdf11-concepts/#dfn-rdf-triple) (if the `rdf-star` feature is enabled).
-#[derive(Eq, PartialEq, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum Subject {
     NamedNode(NamedNode),
     BlankNode(BlankNode),
@@ -382,7 +383,7 @@ impl<'a> From<&'a NamedOrBlankNode> for SubjectRef<'a> {
 
 /// An owned RDF [term](https://www.w3.org/TR/rdf11-concepts/#dfn-rdf-term)
 /// It is the union of [IRIs](https://www.w3.org/TR/rdf11-concepts/#dfn-iri), [blank nodes](https://www.w3.org/TR/rdf11-concepts/#dfn-blank-node), [literals](https://www.w3.org/TR/rdf11-concepts/#dfn-literal) and [triples](https://www.w3.org/TR/rdf11-concepts/#dfn-rdf-triple) (if the `rdf-star` feature is enabled).
-#[derive(Eq, PartialEq, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub enum Term {
     NamedNode(NamedNode),
     BlankNode(BlankNode),
@@ -937,7 +938,7 @@ impl<'a> From<TripleRef<'a>> for Triple {
 
 /// A possible owned graph name.
 /// It is the union of [IRIs](https://www.w3.org/TR/rdf11-concepts/#dfn-iri), [blank nodes](https://www.w3.org/TR/rdf11-concepts/#dfn-blank-node), and the [default graph name](https://www.w3.org/TR/rdf11-concepts/#dfn-default-graph).
-#[derive(Eq, PartialEq, Debug, Clone, Hash, Default)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Default, Serialize, Deserialize)]
 pub enum GraphName {
     NamedNode(NamedNode),
     BlankNode(BlankNode),

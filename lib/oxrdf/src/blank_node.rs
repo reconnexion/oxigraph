@@ -1,4 +1,5 @@
 use rand::random;
+use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::{fmt, str};
 
@@ -16,10 +17,10 @@ use std::{fmt, str};
 /// assert_eq!("_:a122", BlankNode::new("a122")?.to_string());
 /// # Result::<_,oxrdf::BlankNodeIdParseError>::Ok(())
 /// ```
-#[derive(Eq, PartialEq, Debug, Clone, Hash)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct BlankNode(BlankNodeContent);
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 enum BlankNodeContent {
     Named(String),
     Anonymous { id: u128, str: IdStr },
@@ -246,7 +247,7 @@ impl PartialEq<BlankNodeRef<'_>> for BlankNode {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 struct IdStr([u8; 32]);
 
 impl IdStr {

@@ -867,6 +867,7 @@ dependencies = [
  "oxiri",
  "oxsdatatypes",
  "rand",
+ "serde",
  "thiserror",
 ]
 
@@ -898,6 +899,7 @@ name = "oxsdatatypes"
 version = "0.2.0-alpha.1"
 dependencies = [
  "js-sys",
+ "serde",
  "thiserror",
 ]
 
